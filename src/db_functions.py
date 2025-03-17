@@ -2,7 +2,7 @@ import sys, os
 import pyodbc
 import pandas as pd
 from datetime import datetime, timedelta
-fro io import BytesIO
+frof io import BytesIO
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from config.db_config import (
@@ -28,7 +28,7 @@ def setup_activity(db_type):
 
 def setup_activity_download(download_date):
     server, port, database, username, password = ItemLog_down_db_environment_variables()
-    database = f"{database}_{download_date[:4}{download_date[6:8}"
+    database = f"{database}_{download_date[:4]}{download_date[6:8]}"
     activity = Getdata(server, port, database, username, password)
     activity.connect_to_db()
     return activity

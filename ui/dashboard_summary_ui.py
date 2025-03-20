@@ -80,7 +80,6 @@ def dashboard_summary():
 
     yesterday = datetime.today().date() - timedelta(days=1)
     current_time = datetime.now().time()
-
     if date_selected != st.session_state["selected_date"]:
         st.session_state["selected_date"] = date_selected
         st.session_state["last_active"] = time.time()
@@ -121,7 +120,6 @@ def dashboard_summary():
         )
     except Exception as e:
         st.error("데이터를 불러오는 중 오류가 발생했습니다.")
-        st.error(e)
         return
     finally:
         activity.disconnect_from_db()

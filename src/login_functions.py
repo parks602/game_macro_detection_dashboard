@@ -8,6 +8,7 @@ import httpx
 import sys, os
 import socket
 import platform
+import pandas as pd
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -80,11 +81,10 @@ def authenticate_user(username, password):
     conn.close()
 
     if not user:
-        return False, "존재하지 않는 계정입니다.", False  # 계정이 존재하지 않음
-
+        return False, "로그인 정보가 틀립니다.", False  # 계정이 존재하지 않음
     # 비밀번호 검증
     if not bcrypt.checkpw(password.encode(), user[0].encode()):
-        return False, "비밀번호가 틀립니다.", False  # 비밀번호 오류
+        return False, "로그인 정보가 틀립니다.", False  # 비밀번호 오류
 
     # 비밀번호 변경 여부 확인
     if user[1] + timedelta(days=180) < datetime.now():
@@ -123,18 +123,6 @@ def validate_password(password: str) -> str:
 
 # 비밀번호 변경
 def change_password(username, old_password, new_password, new_password_retype):
-    # 비밀번호 정책 검증
-    if old_password == new_password:
-        return False, "새로운 비밀번호는 기존 비밀번호와 다르게 설정해주세요."
-
-    if new_password != new_password_retype:
-        return False, "새 비밀번호와 재입력 비밀번호가 일치하지 않습니다."
-
-    # 비밀번호 정책 검증
-    validation_message = validate_password(new_password)
-    if validation_message != "valid":
-        return False, validation_message
-
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -142,21 +130,35 @@ def change_password(username, old_password, new_password, new_password_retype):
     cursor.execute("SELECT password_hash FROM users WHERE username = ?", (username,))
     user = cursor.fetchone()
 
-    if user and bcrypt.checkpw(old_password.encode(), user[0].encode()):
-        # 비밀번호 해싱
-        hashed_new_pw = hash_password(new_password)
+    if not user or not bcrypt.checkpw(old_password.encode(), user[0].encode()):
+        conn.close()
+        return False, "기존 로그인 정보가 틀립니다"
 
-        # 비밀번호 변경
-        cursor.execute(
-            "UPDATE users SET password_hash = ?, last_password_change = GETDATE() WHERE username = ?",
-            (hashed_new_pw, username),
-        )
-        conn.commit()
+    # 비밀번호 정책 검증
+    if old_password == new_password:
         conn.close()
-        return True, "비밀번호가 성공적으로 변경되었습니다."
-    else:
+        return False, "새로운 비밀번호는 기존 비밀번호와 다르게 설정해주세요."
+
+    if new_password != new_password_retype:
         conn.close()
-        return False, "기존 비밀번호가 잘못되었습니다."
+        return False, "새 비밀번호와 재입력 비밀번호가 일치하지 않습니다."
+
+    # 비밀번호 정책 검증
+    validation_message = validate_password(new_password)
+    if validation_message != "valid":
+        conn.close()
+        return False, validation_message
+
+    hashed_new_pw = hash_password(new_password)
+
+    # 비밀번호 변경
+    cursor.execute(
+        "UPDATE users SET password_hash = ?, last_password_change = GETDATE() WHERE username = ?",
+        (hashed_new_pw, username),
+    )
+    conn.commit()
+    conn.close()
+    return True, "비밀번호가 성공적으로 변경되었습니다."
 
 
 def generate_reset_code():
@@ -205,37 +207,30 @@ def send_message_id(email):
         return False, f"메신저 전송에 실패했습니다. 오류: {e}"
 
 
-def send_reset_code(username=None, email=None):
+def send_reset_code(username, email):
     """인증 코드 메신저 발송"""
     reset_code = str(random.randint(100000, 999999))  # 6자리 랜덤 코드 생성
     create_time = datetime.now()
     expiry_time = datetime.now() + timedelta(minutes=10)  # 만료 시간 10분 후
     conn = get_db_connection()
     cursor = conn.cursor()
-    if username is not None and email is None:
-        cursor.execute("SELECT email FROM users WHERE username = ?", (username,))
-        user = cursor.fetchone()
-        if not user:
-            return False, "사용자 이름이 존재하지 않습니다."
-        email = user[0]
-        # 인증 코드와 만료시간 DB에 저장
-        cursor.execute(
-            "UPDATE password_reset_codes SET reset_code = ?, create_time = ?, reset_expiry = ? WHERE username = ?",
-            (reset_code, create_time, expiry_time, username),
-        )
-        conn.commit()
+    cursor.execute(
+        "SELECT username, email FROM users WHERE username = ? and email = ?",
+        (username, email),
+    )
+    user = cursor.fetchone()
+    if not user:
         conn.close()
-    elif email is not None and username is None:
-        cursor.execute("SELECT email FROM users WHERE email = ?", (email,))
-        email = cursor.fetchone()
-        if not user:
-            return False, "사용자 이메일이 존재하지 않습니다."
-        cursor.execute(
-            "UPDATE password_reset_codes SET reset_code = ?, create_time = ?, reset_expiry = ? WHERE email = ?",
-            (reset_code, create_time, expiry_time, email),
-        )
-        conn.commit()
-        conn.close()
+        return False, "사용자 정보가 존재하지 않습니다."
+    username = user[0]
+    email = user[1]
+    # 인증 코드와 만료시간 DB에 저장
+    cursor.execute(
+        "UPDATE password_reset_codes SET reset_code = ?, create_time = ?, reset_expiry = ? WHERE username = ?",
+        (reset_code, create_time, expiry_time, username),
+    )
+    conn.commit()
+    conn.close()
 
     url = "https://api.dooray.com/common/v1/members"
 
@@ -359,7 +354,50 @@ def get_user_agent():
     # return headers.get("User-Agent", "Unknown")
     return f"Python/{sys.version.split()[0]} ({platform.system()} {platform.release()})"
 
+def check_login_attempt(username):
+    now = datetime.now()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    query = f"""
+    SELECT blocked_time FROM users WHERE username = '{username}'
+    """
+    cursor.execute(query)
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if result is None or result[0] is None:
+        return True
+    elif result[0] > now:
+        return False
+    else:
+        return True
+        
+def check_fail_login(username):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    query = f"""SELECT TOP (10) status
+      FROM login_logs
+      where username = '{username}' 
+      order by login_time DESC"""
+    cursor.execute(query)
+    statuses = [row[0] for row in cursor.fetchall()]
+    fail_count = 0
 
+    for status in statuses:
+        if status == 'failure':
+            fail_count +=1
+        else:
+            break
+
+    if fail_count == 10:
+        query = f"""UPDATE users SET blocked_time = DATEADD(MINUTE, 30, GETDATE"()) WHERE username  = '{username}'"""
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return False, _
+    else:
+        return True, fail_count
+    
 def log_login_attempt(username, status, ip_address="unknown", user_agent="unknown"):
     conn = get_db_connection()
     cursor = conn.cursor()

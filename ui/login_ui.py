@@ -1,7 +1,6 @@
 import streamlit as st
 import time
 import os, sys
-import traceback
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -15,6 +14,8 @@ from src.login_functions import (
     get_user_agent,
     log_login_attempt,
     send_message_id,
+    check_login_attempt,
+    check_fail_login,
 )
 
 
@@ -38,6 +39,8 @@ def login_main_ui():
             if not username:
                 st.error("사용자 이름을 입력하세요.")
                 return
+            if check_login_attempt(username) == False:
+                st.error("로그인 횟수 초과로 로그인 시도 차단 중입니다.")
             success, message, role = authenticate_user(username, password)
             if success:
                 st.session_state.update(
@@ -63,6 +66,13 @@ def login_main_ui():
                     st.session_state["user_agent"],
                 )
                 st.error(message)  # 로그인 실패 사유 출력
+                check_result, login_num = check_fail_login(st.session_state["username"])
+                if check_result == False:
+                    st.error("로그인 실패 횟수 초과로 로그인이 30분간 차단됩니다.")
+                else:
+                    st.info(f"현재 로그인 연속 {login_num}회 실패했습니다. 10회 실패시 로그인이 30분간 차단됩니다")
+                
+
 
 
 # 비밀번호 변경 함수
@@ -110,10 +120,11 @@ def send_reset_code_ui():
         st.write("📩 비밀번호 찾기")
         with st.form(key="forgot_password_form"):
             username = st.text_input("사용자 이름", key="forgot_username")
+            user_email = st.text_input("회사 이메일", key="forgot_useremail")
             submit_button = st.form_submit_button("인증 코드 보내기")
         if submit_button:
             checker, result_message = send_reset_code(
-                username=username
+                username=username, email=user_email
             )  # DB에서 코드 생성 및 전송
             if checker == True:
                 st.success(result_message)
@@ -177,7 +188,8 @@ def send_reset_code_with_email_ui():
     """아이디찾기기 코드 요청 UI"""
     with st.sidebar:
         st.write("🔑 아이디 찾기")
-        with st.form(key="forgot_password_form"):
+        st.info("아이디 찾기 기능은 보안상 제한됩니다. 관리자에게 문의주세요.")
+        """with st.form(key="forgot_password_form"):
             email = st.text_input("회사 이메일", key="forgot_useremail")
             submit_button = st.form_submit_button("인증 코드 보내기")
         if submit_button:
@@ -193,7 +205,7 @@ def send_reset_code_with_email_ui():
 
                 st.rerun()
             else:
-                st.error(result_message)
+                st.error(result_message)"""
 
 
 def find_id_ui():

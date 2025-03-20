@@ -68,7 +68,6 @@ def dashboard_same_time_same_action():
             )
         except Exception as e:
             st.error("데이터를 불러오는 중 오류가 발생했습니다.")
-            st.error(e)
             return
         finally:
             activity.disconnect_from_db()
@@ -127,7 +126,6 @@ def dashboard_same_time_same_action():
     df = df.sort_values(
         by=["IP_total", "Total_action_count"], ascending=[False, False]
     ).reset_index(drop=True)
-
     df.drop(columns=["IP_total"], inplace=True)
     st.write("##### 의심 유저 도출 근거 데이터")
     st.dataframe(

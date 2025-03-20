@@ -215,15 +215,6 @@ def datamining(yesterday, save_folder):
         merged_df = pd.merge(
             filtered_df, filtered_df, on=["logtime"], suffixes=("_x", "_y")
         )
-        # with ThreadPoolExecutor() as executor:
-        #     results = list(executor.map(get_ip_info, filtered_df["ip"].unique()))
-        # 유효한 결과만 필터링
-        # valid_results = [result for result in results if result]
-        # 결과를 DataFrame으로 변환
-        # ip_df = pd.DataFrame(valid_results)[
-        #     ["ip", "city", "region", "country", "loc", "org", "postal"]
-        # ]
-        # ip_df.insert(0, "Date", yesterday)
 
         # 조건: 서로 다른 srcAccountID + SID 또는 MapName이 다름
         filtered_df2 = merged_df[

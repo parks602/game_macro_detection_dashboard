@@ -80,7 +80,6 @@ def dashboard_self_sim():
             )
         except Exception as e:
             st.error("데이터 로딩 중 오류가 발생했습니다.")
-            st.error(e)
             return
         finally:
             activity.disconnect_from_db()
@@ -110,7 +109,6 @@ def dashboard_self_sim():
             (double_narrow_outliers["logtime_count"] > 100)
             & (double_narrow_outliers["self_similarity"] != 1)
         ]
-        num_double_narrow_outliers = filtered_outliers.shape[0]
         # 평균, 중앙값 계산
         mean_value = round(df["self_similarity"].mean(), 4)
         median_value = round(df["self_similarity"].median(), 4)

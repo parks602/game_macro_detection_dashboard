@@ -17,8 +17,7 @@ def login_form(
     login_password_help: str = "Password cannot be recovered if lost",
     login_button_label: str = "login account",
 ):
-    # client = get_db_connection()
-    client = "a"
+    client = get_db_connection()
     with st.form(key="login"):
         username = st.text_input(
             label=login_username_label,
@@ -38,15 +37,12 @@ def login_form(
             type="primary",
             use_container_width=True,
         ):
-            validation_message = validate_input_and_password(username, password, client)
-            if validation_message != True:
-                st.error(validation_message)
-            role = authenticate_system(username, password, client)
-            if role != False:
+            success, role = authenticate_system(username, password, client)
+            if success == True:
                 client.disconnect_from_db()
                 st.session_state.update({"authenticated": True, "role": role})
                 st.success(f"{username}님, 로그인 성공!")
-                time.sleep(1)
+                time.sleep(2)
                 st.rerun()
             else:
                 st.error(role)

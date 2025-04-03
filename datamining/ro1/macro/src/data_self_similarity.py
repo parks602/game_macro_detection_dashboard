@@ -2,9 +2,9 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import warnings
-from .db_functions import setup_activity, load_query
-from .data_analysis_executor import logger
-
+from db_functions import setup_activity, load_query
+from data_logger import logger
+import warnings
 
 warnings.simplefilter("ignore", UserWarning)
 
@@ -16,8 +16,8 @@ class SelfSimilarityProcessor:
 
     def __init__(
         self,
-        db_type: str,
         yesterday: str,
+        db_type: str = 'pdu',
         query_name: str = "get_daily_user_activity_action_all",
         table_name: str = "macro_user_self_similarity",
     ):
@@ -48,7 +48,7 @@ class SelfSimilarityProcessor:
         logger.info(f"Fetching user activity for {self.yesterday}")
         try:
             query = load_query(self.query_name)
-            activity = setup_activity(db_type="itemlog")
+            activity = setup_activity(db_type="datamining_row")
             df = activity.get_df(query.format(date=self.yesterday))
             activity.disconnect_from_db()
             logger.info(
@@ -111,10 +111,6 @@ class SelfSimilarityProcessor:
 
         self_sim = 1 - 0.5 * sigma if avg_cosine_similarity != 0 else 0.5
         logtime_count = len(action_counts)
-
-        logger.info(
-            f"Calculated self-similarity for {user_df['srcAccountID'].iloc[0]}: Cosine similarity = {avg_cosine_similarity}, Self similarity = {H}"
-        )
 
         return pd.Series(
             {

@@ -19,8 +19,7 @@ def change_pwd_form(
     re_new_password_help: str = None,
     change_button_label: str = "change password",
 ):
-    # client = get_db_connection()
-    client = "a"
+    client = get_db_connection()
 
     with st.form(key="change_password"):
         username = st.text_input(
@@ -57,11 +56,12 @@ def change_pwd_form(
             success, message = change_password(
                 username, password, new_password, re_new_password, client
             )
-            if success:
+            if success == True:
                 client.disconnect_from_db()
                 st.success(message)
                 st.session_state["change_step"] = "finish_password"
-                time.sleep(1)
+                st.session_state.selected_tab = "로그인"
+                time.sleep(2)
                 st.rerun()
             else:
                 st.error(message)

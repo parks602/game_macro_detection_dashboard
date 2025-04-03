@@ -2,7 +2,7 @@ import streamlit as st
 from pathlib import Path
 
 # 📌 최상위 프로젝트 폴더 설정
-BASE_DIR = Path("project")
+BASE_DIR = Path('.')
 
 
 def cosine_show_top_sentence():
@@ -10,6 +10,7 @@ def cosine_show_top_sentence():
     date_str = date_selected.strftime("%Y-%m-%d")
     save_folder = (
         BASE_DIR
+        / ".."
         / "datamining"
         / "ro1"
         / "macro"
@@ -18,7 +19,7 @@ def cosine_show_top_sentence():
         / date_str[:4]
         / date_str[5:7]
         / date_str[8:10]
-    )
+    ).resolve().as_posix()
     print_date = date_selected.strftime("%Y년 %m월 %d일")
     st.info(f"{print_date} 데이터 결과 입니다.")
     st.write(

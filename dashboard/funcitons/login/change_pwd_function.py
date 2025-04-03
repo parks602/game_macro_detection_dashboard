@@ -6,7 +6,9 @@ from funcitons.db_connector import setup_activity
 
 
 def change_password(username, old_password, new_password, new_password_retype, client):
-    query = ("SELECT password_hash FROM users WHERE username = ?", (username,))
+    query = f"""SELECT password_hash
+            FROM users
+            WHERE username = '{username}'"""
     user = client.get_one_fetch(query)
 
     if not user or not bcrypt.checkpw(old_password.encode(), user[0].encode()):
@@ -20,16 +22,18 @@ def change_password(username, old_password, new_password, new_password_retype, c
         return False, "새 비밀번호와 재입력 비밀번호가 일치하지 않습니다."
 
     # 비밀번호 정책 검증
-    validation_message = validate_password(new_password)
+    success, validation_message = validate_password(new_password)
     if validation_message != "valid":
         return False, validation_message
 
     hashed_new_pw = hash_password(new_password)
 
     update_query = (
-        "UPDATE users SET password_hash = ?, last_password_change = GETDATE() WHERE username = ?",
-        (hashed_new_pw, username),
-    )
+        f"""UPDATE users
+            SET password_hash = '{hashed_new_pw}',
+                last_password_change = GETDATE()
+            WHERE username = '{username}'"""
+        )
     client.insert_with_execute(update_query)
     return True, "비밀번호가 성공적으로 변경되었습니다. 로그인 해주세요."
 

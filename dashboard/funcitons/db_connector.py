@@ -1,6 +1,7 @@
 import pyodbc
 from sqlalchemy import create_engine
 import logging
+import pandas as pd
 
 from funcitons.config_reader import (
     pdu_db_environment_variables,
@@ -107,7 +108,26 @@ class Getdata:
         except Exception as e:
             logger.error(f"❌ Failed to insert data: {e}")
 
+    def get_df(self, query):
+        """
+        주어진 SQL 쿼리를 사용하여 데이터를 조회하고 DataFrame으로 반환합니다.
 
+        Args:
+            query (str): 실행할 SQL 쿼리.
+
+        Returns:
+            pd.DataFrame: 쿼리 실행 결과를 담은 DataFrame.
+        """
+        if not self.conn:
+            logger.error("No active connection. Please connect to the database first.")
+            return None
+        try:
+            df = pd.read_sql(query, self.conn)
+            return df
+        except Exception as e:
+            logger.error(f"Failed to fetch data with query '{query}': {e}")
+            return None
+        
 def setup_activity():
     """
     주어진 데이터베이스 유형에 맞는 연결을 설정합니다.

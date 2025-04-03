@@ -23,7 +23,7 @@ def validate_password(password: str) -> str:
     # 특수문자 체크
     if len(re.findall(r"[^\w\s]", password)) == 0:
         return "비밀번호는 최소 1개의 특수문자를 포함해야 합니다."
-    return True  # 비밀번호가 모든 규칙을 만족할 경우
+    return True, 'valid'  # 비밀번호가 모든 규칙을 만족할 경우
 
 
 def check_input(username, password):
@@ -73,20 +73,28 @@ def authenticate(username, password, client):
     성공하면 True와 함께 역할 정보를 반환하고, 실패하면 False와 메시지를 반환합니다.
     """
     query = (
-        "SELECT password_hash, last_password_change, role FROM users WHERE username = ?",
-        (username,),
-    )
+        f"SELECT password_hash, last_password_change, role FROM users WHERE username = '{username}'")
     user = client.get_one_fetch(query)
     if not user:
-        return "로그인 정보가 틀립니다."  # 계정이 존재하지 않음
+        return False, "로그인 정보가 틀립니다."  # 계정이 존재하지 않음
     # 비밀번호 검증
     if not bcrypt.checkpw(password.encode(), user[0].encode()):
-        return "로그인 정보가 틀립니다."  # 비밀번호 오류
+        return False, "로그인 정보가 틀립니다."  # 비밀번호 오류
 
     # 비밀번호 변경 여부 확인
     if user[1] + timedelta(days=180) < datetime.now():
-        return "비밀번호를 변경한 지 180일이 지났습니다. 비밀번호 변경이 필요합니다."
-    return user[2]  # 로그인 성공
+        return False, "비밀번호를 변경한 지 180일이 지났습니다. 비밀번호 변경이 필요합니다."
+    
+    return True, str(user[2]) # 로그인 성공
+
+
+def authenticate_system(username, password, client):
+    success, login_message = authenticate(username, password, client)
+    if success == True:
+        log_login_attempt(username, "success", client)
+    else:
+        log_login_attempt(username, "failure", client)
+    return success, login_message
 
 
 def log_login_attempt(username, status, client):
@@ -132,15 +140,6 @@ def get_user_agent():
         str: 사용자 에이전트 정보
     """
     return f"Python/{sys.version.split()[0]} ({platform.system()} {platform.release()})"
-
-
-def authenticate_system(username, password, client):
-    login_message = authenticate(username, password, client)
-    if login_message != True:
-        log_login_attempt(username, "failure", client)
-    elif login_message:
-        log_login_attempt(username, "success", client)
-        return login_message
 
 
 def check_fail_login(username, client):

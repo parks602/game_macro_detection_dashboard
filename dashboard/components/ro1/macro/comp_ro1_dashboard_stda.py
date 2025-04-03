@@ -33,6 +33,7 @@ def stda_show_metrics(df):
 
 def stda_show_graph_logtime(fig):
     st.write("#### IP별 logtime 고유 개수 & 누적 분포도")
+    plt.rc("font", family="Malgun Gothic")
     st.pyplot(fig)
 
 

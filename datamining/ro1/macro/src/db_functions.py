@@ -5,7 +5,17 @@ import logging
 import os
 import sys
 
-sys.path.append(os.path.dirname(os.path.abspath((os.path.dirname(__file__)))))
+sys.path.append(
+    os.path.dirname(
+        os.path.abspath(
+            os.path.dirname(
+                os.path.abspath(
+                    os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
+                )
+            )
+        )
+    )
+)
 from common.config.db_config import get_db_environment_variables
 
 # 로깅 설정
@@ -253,8 +263,11 @@ def load_query(query_name: str) -> str:
 
     # 파일 읽기
     try:
-        with open(file_path, "r", encoding="utf-8") as file:
-            return file.read()  # 읽어서 공백 제거 후 반환
+        with open(file_path, "r", encoding="utf-8-sig") as file:
+            lines = file.readlines()
+            cleaned_lines = [line.split("--")[0].strip() for line in lines if not line.strip().startswith("--")]
+            query = " ".join(cleaned_lines)
+            return query.strip()
     except Exception as e:
         logger.error(f"Error reading SQL file '{file_path}': {e}")
         return None

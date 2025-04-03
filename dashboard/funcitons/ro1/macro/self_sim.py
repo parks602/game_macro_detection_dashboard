@@ -61,39 +61,3 @@ def self_calculate_values(df):
     )
 
 
-def self_make_graph(df, outliers):
-    # 그래프들 출력
-    fig, axes = plt.subplots(1, 3, figsize=(15, 6))
-
-    # sns.boxplot(y=df["self_similarity"], ax=axes[0])
-    axes[0].boxplot(df["self_similarity"])
-    axes[0].set_title("Self-Similarity Distribution (Original)")
-    axes[0].set_ylabel("Self-Similarity")
-    axes[0].set_ylim(0.5, 1.1)  # Y축 범위 고정
-    axes[0].grid(True, linestyle="--", alpha=0.7)
-
-    # sns.histplot(
-    #    df["self_similarity"], bins=30, kde=True, ax=axes[1], color="skyblue"
-    # )
-    axes[1].hist(
-        df["self_similarity"],
-        bins=30,
-        color="skyblue",
-        edgecolor="black",
-        alpha=0.7,
-    )
-    axes[1].set_title("Self-Similarity Histogram")
-    axes[1].set_ylabel("Frequency")
-
-    # sns.histplot(
-    #    outliers["self_similarity"], kde=True, ax=axes[2], color="red", bins=30
-    # )
-    axes[2].hist(
-        outliers["self_similarity"],
-        bins=30,
-        color="red",
-        edgecolor="black",
-        alpha=0.7,
-    )
-    axes[2].set_title("Outliers Distribution")
-    axes[2].set_ylabel("Frequency")

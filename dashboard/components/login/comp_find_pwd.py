@@ -28,8 +28,7 @@ def send_reset_code_form(
     find_email_help: str = None,
     find_button_label: str = "인증번호 전송",
 ):
-    # client = get_db_connection()
-    client = "a"
+    client = get_db_connection()
     with st.form(key="find_password"):
         username = st.text_input(
             label=find_username_label,
@@ -68,8 +67,7 @@ def get_reset_code_form(
     resetcode_help: str = None,
     resetcode_button_label: str = "인증번호 확인",
 ):
-    # client = get_db_connection()
-    client = "a"
+    client = get_db_connection()
     with st.form(key="verify_resetcode"):
         resetcode = st.text_input(
             label=resetcode_label,
@@ -102,8 +100,7 @@ def set_password(
     re_password_help: str = None,
     reset_button_label: str = "비밀번호 번경",
 ):
-    # client = get_db_connection()
-    client = "a"
+    client = get_db_connection()
     with st.form(key="rest_password"):
         new_password = st.text_input(
             label=new_password_label,
@@ -128,7 +125,7 @@ def set_password(
                 message = change_user_password(
                     st.session_state["reset_username"], new_password, client
                 )
-                if message:
+                if message==True:
                     client.disconnect_from_db()
                     st.success("비밀번호가 변경되었습니다. 로그인 해주세요")
                     time.sleep(1)

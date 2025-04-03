@@ -22,7 +22,7 @@ def user_show_top_sentence():
 
 
 def user_show_pviot_df(pivot_df):
-    st.write("##### 매크로 탐지 유저의 근거 표, 1:탐지, 0:미탐지)")
+    st.write("##### 매크로 탐지 유저의 근거 표, 1:탐지, 0:미탐지")
     st.dataframe(pivot_df, use_container_width=True)
 
 
@@ -32,8 +32,6 @@ def user_selector(detected_id):
 
 
 def user_show_middle(df, selected_aid):
-    if not st.session_state["macro_date"]:
-        st.session_state["macro_date"] = None
     all_macro_detected_date = df[
         (df["AID"] == selected_aid) & (df["distinction"] == "detection")
     ]["Date"].sort_values()
@@ -104,6 +102,7 @@ def user_show_reason(reasons, reason_dict):
         st.write(f"##### 📌 {reason_dict[reason]}")
         if reason == "action_diff":
             show_action_diff(
+                st.session_state["macro_date"],
                 st.session_state["selected_date"],
                 st.session_state["user_aid"],
             )
@@ -121,7 +120,7 @@ def user_show_reason(reasons, reason_dict):
             )
         elif reason == "cosine_sim":
             show_cosine_sim(
-                date_str,
+                st.session_state["selected_date"],
                 str(st.session_state["user_aid"]),
                 st.session_state["macro_date"],
             )
@@ -145,8 +144,8 @@ def show_action_one(date_str, aid, macro_date):
     st.dataframe(df.drop_duplicates(), use_container_width=True)
 
 
-def show_action_diff(date_str, aid):
-    df = get_action_diff(date_str)
+def show_action_diff(macro_date, date_str, aid):
+    df = get_action_diff(macro_date, date_str)
     user_df = df[df["AID"] == aid]
     active_ip = user_df["ip"].unique()
     ip_list_str = ", ".join(active_ip)
@@ -193,19 +192,21 @@ def show_self_sim(date_str, aid, macro_date):
 
 
 def show_cosine_sim(date_str, aid, macro_date):
+    print(macro_date)
     # 이미지 파일 경로 설정
-    BASE_DIR = Path("project")
+    BASE_DIR = Path(".")
     save_folder = (
         BASE_DIR
+        / ".."
         / "datamining"
         / "ro1"
         / "macro"
         / "result"
         / "graph"
-        / date_str[:4]
-        / date_str[5:7]
-        / date_str[8:10]
-    )
+        / macro_date[:4]
+        / macro_date[5:7]
+        / macro_date[8:10]
+    ).resolve().as_posix()
     df = get_cosine(macro_date, date_str)
 
     user_df = df[df["AID"] == aid].reset_index(drop=True)

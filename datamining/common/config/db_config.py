@@ -36,6 +36,12 @@ def get_db_environment_variables(db_type):
         database = os.getenv("DATAMINING_DB_DATABASE")
         username = os.getenv("DATAMINING_DB_USERNAME")
         password = os.getenv("DATAMINING_DB_PASSWORD")
+    elif db_type == 'datamining_row':
+        server = os.getenv("DATAMINING_LOWDB_SERVER")
+        port = os.getenv("DATAMINING_LOWDB_PORT")
+        database = os.getenv("DATAMINING_LOWDB_DATABASE")
+        username = os.getenv("DATAMINING_LOWDB_USERNAME")
+        password = os.getenv("DATAMINING_LOWDB_PASSWORD")    
     else:
         raise ValueError(f"Unknown db_type: {db_type}")
 

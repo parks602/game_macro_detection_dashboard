@@ -7,11 +7,11 @@ sys.path.append(
         os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
     )
 )
-from db_connector import setup_activity_datamining
+from db_connector import setup_activity
 
 
-def stsa_load_data(date_str):
-    activity = setup_activity_datamining()
+def stda_load_data(date_str):
+    activity = setup_activity()
     query = """SELECT * 
         FROM [dbo].[macro_user_same_time_diff_action_detail] 
         WHERE Date = '{date}'"""

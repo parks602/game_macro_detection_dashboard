@@ -19,7 +19,6 @@ def dashboard_CS():
     date_selector()
 
     date_str = cs_show_top_sentence()
-
     df = cs_load_data(date_str)
     (
         new_detected_users,
@@ -29,7 +28,6 @@ def dashboard_CS():
         block_user,
         clean_user,
     ) = cs_calculate_user_counts(df, date_str)
-
     # 제재 비율 계산
     block_ratio = round(block_user / macro_user, 2)
     block_percentage = round(block_ratio * 100, 2)
@@ -70,7 +68,7 @@ def dashboard_summary():
     date_selector()
     st.markdown("### 🔥 탐지 현황 요약")
     date_str = summary_show_top_sentence()
-    df = summary_load_data()
+    df = summary_load_data(date_str)
     normal_count, macro_count, suspicion_count, block_count, new_detected_users = (
         summary_calculate_metric(df, date_str)
     )
@@ -87,7 +85,7 @@ def dashboard_summary():
     with col98:
         summary_show_explain(normal_count, macro_count, suspicion_count, block_count)
 
-    st.wirte("---")
+    st.write("---")
     col1, col2, col3 = st.columns([1, 1, 1])
     with col1:
         st.subheader("📊 매크로 탐지 vs 블럭된 유저")
@@ -137,14 +135,12 @@ from funcitons.ro1.macro.stsa import (
     stsa_compute_statistics,
     stsa_process_ip_data,
 )
-from funcitons.ro1.macro.stda import (
-    stsa_load_data,
-    stda_gropuby_df,
-    stda_plot_ip_logtime_distribution,
-    stda_top20_user_graph,
-    select_top_user,
-)
 
+from .comp_ro1_dashboard_stsa import (
+    stsa_show_top_sentence,
+    stsa_show_metrics,
+    stsa_show_dataframes,
+)
 
 def dashboard_same_time_same_action():
     st.title("멀티 클라이언트 동시 같은 행동")
@@ -160,10 +156,12 @@ def dashboard_same_time_same_action():
     stsa_show_dataframes(result_df, df)
 
 
-from .comp_ro1_dashboard_stsa import (
-    stsa_show_top_sentence,
-    stsa_show_metrics,
-    stsa_show_dataframes,
+from funcitons.ro1.macro.stda import (
+    stda_load_data,
+    stda_gropuby_df,
+    stda_plot_ip_logtime_distribution,
+    stda_top20_user_graph,
+    select_top_user,
 )
 
 from .comp_ro1_dashboard_stda import (
@@ -181,7 +179,7 @@ def dashboard_same_time_diff_action():
     st.title("멀티 클라이언트 동시 다른 행동")
     date_selector()
     date_str = stda_show_top_sentence()
-    df = stsa_load_data(date_str)
+    df = stda_load_data(date_str)
     ip_logtime_unique = stda_gropuby_df(df)
     stda_show_metrics(df)
 
@@ -193,19 +191,13 @@ def dashboard_same_time_diff_action():
     with col1:
         stda_show_graph_logtime(fig)
     with col2:
-        stda_show_df_logtime(df)
+        stda_show_df_logtime(ip_logtime_unique)
     stda_show_graph_summary()
 
     st.write("---")
 
     top_users = select_top_user(df)
     stda_show_graph_top_users(stda_top20_user_graph(top_users))
-    col1, col2 = st.columns(2)
-    with col1:
-        stda_show_graph_logtime(fig)
-    with col2:
-        stda_show_dataframe_top_user(top_users)
-
 
 from .comp_ro1_dashboard_cosine_sim import (
     cosine_show_top_sentence,
@@ -244,8 +236,6 @@ from .comp_ro1_dashboard_self_sim import (
 from funcitons.ro1.macro.self_sim import (
     self_load_data,
     self_calculate_values,
-    self_make_graph,
-    self_calculate_values,
 )
 
 
@@ -268,5 +258,5 @@ def dashboard_self_sim():
     outliers = self_show_metric(
         df, num_outliers_wide, filtered_outliers, mean_value, median_value, Q1, Q3, IQR
     )
-    self_show_graph(self_make_graph(df, outliers))
+    self_show_graph(df, outliers)
     self_show_bottom(filtered_outliers, Q1, Q3, IQR, num_outliers_wide)

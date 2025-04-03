@@ -1,6 +1,6 @@
 import pandas as pd
-from .db_functions import setup_activity
-from .data_analysis_executor import logger
+from db_functions import setup_activity
+from data_logger import logger
 from queries import GET_DAILY_USER_ACTIVITY_ALL_ACTION
 
 

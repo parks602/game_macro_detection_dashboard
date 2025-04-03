@@ -1,7 +1,7 @@
 import pandas as pd
 import warnings
-from .db_functions import setup_activity, load_query
-from .data_analysis_executor import logger
+from db_functions import setup_activity, load_query
+from data_logger import logger
 
 warnings.simplefilter("ignore", UserWarning)
 
@@ -14,7 +14,7 @@ class DiffActionProcessor:
     def __init__(
         self,
         yesterday: str,
-        db_type: str = "itemlog",
+        db_type: str = "datamining_row",
         query_name: str = "get_daily_user_activity_action_all",
         table_name: str = "macro_user_same_time_diff_action_detail",
     ):
@@ -66,7 +66,7 @@ class DiffActionProcessor:
         logger.info(
             "Filtering users with multiple actions and different account IDs at the same time"
         )
-        df.drop(columns=["sid"], inplace=True)  # sid 컬럼 삭제
+        df.drop(columns=["SID"], inplace=True)  # sid 컬럼 삭제
         grouped = df.groupby(["IP", "logtime"]).filter(lambda x: len(x) > 1)
         result = grouped.groupby(["IP", "logtime"]).filter(
             lambda x: x["action"].nunique() > 1 and x["srcAccountID"].nunique() > 1

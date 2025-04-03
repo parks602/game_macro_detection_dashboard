@@ -51,7 +51,7 @@ def get_action_one_df(aid, macro_date, date_str):
     return df
 
 
-def get_action_diff(date_str):
+def get_action_diff(macro_date, date_str):
     activity = setup_activity()
     query = f"""select srcAccountID as AID , ip, logtime, Action from macro_user_same_time_diff_action_detail where Date = '{macro_date}'"""
     df = activity.get_df(query.format(date_str=date_str))

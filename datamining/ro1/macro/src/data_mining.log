@@ -1,0 +1,19 @@
+DataMining, 2025-04-02 09:27:40,585 - INFO - Processing data for users with different actions at the same time for 2025-04-01
+DataMining, 2025-04-02 09:27:40,585 - INFO - Fetching user activity for 2025-04-01
+DataMining, 2025-04-02 09:27:55,606 - ERROR - Failed to connect to the database: ('08001', '[08001] [Microsoft][ODBC Driver 17 for SQL Server]MAX_PROVS: Connection string is not valid [87].  (87) (SQLDriverConnect); [08001] [Microsoft][ODBC Driver 17 for SQL Server]Login timeout expired (0); [08001] [Microsoft][ODBC Driver 17 for SQL Server]A network-related or instance-specific error has occurred while establishing a connection to SQL Server. Server is not found or not accessible. Check if instance name is correct and if SQL Server is configured to allow remote connections. For more information see SQL Server Books Online. (87)')
+DataMining, 2025-04-02 09:27:55,616 - ERROR - Failed to fetch user activity for 2025-04-01: 'date+1'
+DataMining, 2025-04-02 09:27:55,616 - ERROR - Failed to process data for 2025-04-01: 'date+1'
+DataMining, 2025-04-02 09:27:55,616 - ERROR - 오류 발생: 'date+1'
+Traceback (most recent call last):
+  File "C:\Users\Gravity\Desktop\project\datamining\ro1\macro\src\data_analysis_executor.py", line 27, in main
+    processor.make_diff_action_data()
+  File "C:\Users\Gravity\Desktop\project\datamining\ro1\macro\src\data_same_time_diff_action.py", line 109, in make_diff_action_data
+    df = self.fetch_user_activity()
+  File "C:\Users\Gravity\Desktop\project\datamining\ro1\macro\src\data_same_time_diff_action.py", line 46, in fetch_user_activity
+    df = activity.get_df(query.format(date=self.yesterday))
+KeyError: 'date+1'
+DataMining, 2025-04-02 09:27:55,620 - ERROR - 오류 발생: SelfSimilarityProcessor.__init__() missing 1 required positional argument: 'db_type'
+Traceback (most recent call last):
+  File "C:\Users\Gravity\Desktop\project\datamining\ro1\macro\src\data_analysis_executor.py", line 31, in main
+    processor = SelfSimilarityProcessor(yesterday=yesterday)
+TypeError: SelfSimilarityProcessor.__init__() missing 1 required positional argument: 'db_type'

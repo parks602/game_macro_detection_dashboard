@@ -1,0 +1,4 @@
+/Save_files
+.env
+*.pyc
+*.txt

@@ -2,20 +2,20 @@ import streamlit as st
 
 from ...comp_common import date_selector
 
-from .comp_ro1_dashboard_cs import (
+from .comp_dashboard_cs import (
     cs_display_metrics,
     cs_display_pie_charts,
     cs_show_block_warning,
     cs_show_top_sentence,
 )
-from funcitons.ro1.macro.cs import (
+from funcitons.game.macro.cs import (
     cs_load_data,
     cs_calculate_user_counts,
 )
 
 
 def dashboard_CS():
-    st.title("RO1 바포메트 서버 유저 현황")
+    st.title("서버 유저 현황")
     date_selector()
 
     date_str = cs_show_top_sentence()
@@ -47,7 +47,7 @@ def dashboard_CS():
     cs_display_pie_charts(macro_user, suspic_user, block_user, clean_user)
 
 
-from .comp_ro1_dashboard_summary import (
+from .comp_dashboard_summary import (
     summary_show_second_metric,
     summary_show_bottom,
     summary_show_expanders,
@@ -55,7 +55,7 @@ from .comp_ro1_dashboard_summary import (
     summary_show_first_metric,
     summary_show_top_sentence,
 )
-from funcitons.ro1.macro.summary import (
+from funcitons.game.macro.summary import (
     summary_make_graph,
     summary_calculate_metric,
     summary_load_data,
@@ -106,14 +106,14 @@ def dashboard_summary():
         summary_show_bottom(reason_counts)
 
 
-from .comp_ro1_dashboard_user_search import (
+from .comp_dashboard_user_search import (
     user_show_top_sentence,
     user_show_pviot_df,
     user_selector,
     user_show_middle,
     user_show_reason,
 )
-from funcitons.ro1.macro.user_search import user_load_data, user_make_pivot
+from funcitons.game.macro.user_search import user_load_data, user_make_pivot
 
 
 def dashboard_user_detail():
@@ -129,18 +129,19 @@ def dashboard_user_detail():
     user_show_reason(reasons, reason_dict)
 
 
-from funcitons.ro1.macro.stsa import (
+from funcitons.game.macro.stsa import (
     stsa_load_data,
     stsa_filter_macro_users,
     stsa_compute_statistics,
     stsa_process_ip_data,
 )
 
-from .comp_ro1_dashboard_stsa import (
+from .comp_dashboard_stsa import (
     stsa_show_top_sentence,
     stsa_show_metrics,
     stsa_show_dataframes,
 )
+
 
 def dashboard_same_time_same_action():
     st.title("멀티 클라이언트 동시 같은 행동")
@@ -156,7 +157,7 @@ def dashboard_same_time_same_action():
     stsa_show_dataframes(result_df, df)
 
 
-from funcitons.ro1.macro.stda import (
+from funcitons.game.macro.stda import (
     stda_load_data,
     stda_gropuby_df,
     stda_plot_ip_logtime_distribution,
@@ -164,7 +165,7 @@ from funcitons.ro1.macro.stda import (
     select_top_user,
 )
 
-from .comp_ro1_dashboard_stda import (
+from .comp_dashboard_stda import (
     stda_show_top_sentence,
     stda_show_metrics,
     stda_show_graph_logtime,
@@ -199,7 +200,8 @@ def dashboard_same_time_diff_action():
     top_users = select_top_user(df)
     stda_show_graph_top_users(stda_top20_user_graph(top_users))
 
-from .comp_ro1_dashboard_cosine_sim import (
+
+from .comp_dashboard_cosine_sim import (
     cosine_show_top_sentence,
     cosine_show_metric,
     cosine_show_histogram,
@@ -207,7 +209,7 @@ from .comp_ro1_dashboard_cosine_sim import (
     cosine_show_group_graph,
     cosine_show_bottom,
 )
-from funcitons.ro1.macro.cosine_sim import cosine_load_data
+from funcitons.game.macro.cosine_sim import cosine_load_data
 
 
 def dashboard_cos_sim():
@@ -226,14 +228,14 @@ def dashboard_cos_sim():
     cosine_show_bottom()
 
 
-from .comp_ro1_dashboard_self_sim import (
+from .comp_dashboard_self_sim import (
     self_show_top_sentence,
     self_show_metric,
     self_show_graph,
     self_show_bottom,
 )
 
-from funcitons.ro1.macro.self_sim import (
+from funcitons.game.macro.self_sim import (
     self_load_data,
     self_calculate_values,
 )

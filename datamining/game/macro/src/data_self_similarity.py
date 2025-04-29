@@ -1,6 +1,6 @@
-import pandas as pd
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
+import pandas as pd  # type: ignore
+import numpy as np  # type: ignore
+from sklearn.metrics.pairwise import cosine_similarity  # type: ignore
 import warnings
 from db_functions import setup_activity, load_query
 from data_logger import logger
@@ -17,7 +17,7 @@ class SelfSimilarityProcessor:
     def __init__(
         self,
         yesterday: str,
-        db_type: str = 'pdu',
+        db_type: str = "pdu",
         query_name: str = "get_daily_user_activity_action_all",
         table_name: str = "macro_user_self_similarity",
     ):

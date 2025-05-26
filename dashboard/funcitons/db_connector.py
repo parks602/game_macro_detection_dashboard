@@ -1,17 +1,22 @@
 import pyodbc
 from sqlalchemy import create_engine
 import logging
+import os
 import pandas as pd
-
+from datetime import datetime
 from funcitons.config_reader import (
     pdu_db_environment_variables,
     datamining_db_environment_variables,
+    itemlog_db_environment_variables,
 )
 
 # 로깅 설정
+today_str = datetime.now().strftime("%Y-%m%d")
+log_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'logger')
+log_filename = os.path.join(log_dir, f'{today_str}_app_db_error.log')
 logging.basicConfig(
-    filename="ui_database.log",
-    format="DataMining, %(asctime)s - %(levelname)s - %(message)s",  # 로그 메시지 형식 설정
+    filename=f"{log_filename}.log",
+    format="DataMining, %(asctime)s - %(levelname)s - %(message)s %(filename)s:%(lineno)d in %(funcName)s()",  # 로그 메시지 형식 설정
     level=logging.INFO,  # 기본 레벨을 INFO로 설정 (INFO 이상의 레벨은 모두 로깅됨)
 )
 
@@ -108,6 +113,22 @@ class Getdata:
         except Exception as e:
             logger.error(f"❌ Failed to insert data: {e}")
 
+    def insert_login_with_execute(self, query, values):
+        """
+        주어진 SQL 쿼리를 사용하여 데이터를 삽입합니다.
+
+        Args:
+            query (str): 실행할 SQL 쿼리.
+        """
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(query, values)
+            self.conn.commit()
+            logger.info("{query} is good")
+            logger.info("✅ Data inserted successfully.")
+        except Exception as e:
+            logger.error(f"❌ Failed to insert data: {e}")
+
     def get_df(self, query):
         """
         주어진 SQL 쿼리를 사용하여 데이터를 조회하고 DataFrame으로 반환합니다.
@@ -154,3 +175,10 @@ def setup_activity_datamining():
     activity = Getdata(server, port, database, username, password)
     activity.connect_to_db()
     return activity
+
+def setup_activity_itemlog():
+    server, port, database, username, password = itemlog_db_environment_variables()
+    activity = Getdata(server, port, database, username, password)
+    activity.connect_to_db()
+    return activity
+

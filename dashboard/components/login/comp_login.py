@@ -40,7 +40,7 @@ def login_form(
             success, role = authenticate_system(username, password, client)
             if success == True:
                 client.disconnect_from_db()
-                st.session_state.update({"authenticated": True, "role": role})
+                st.session_state.update({"authenticated": True, "role": role, "user_name":username})
                 st.success(f"{username}님, 로그인 성공!")
                 time.sleep(2)
                 st.rerun()

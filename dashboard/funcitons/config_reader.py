@@ -21,3 +21,12 @@ def datamining_db_environment_variables():
     username = os.getenv("DATAMINING_DB_USERNAME")
     password = os.getenv("DATAMINING_DB_PASSWORD")
     return server, port, database, username, password
+
+def itemlog_db_environment_variables():
+    load_dotenv()
+    server = os.getenv("DATAMINING_DB_SERVER")
+    port = os.getenv("DATAMINING_DB_PORT")
+    database = os.getenv("DATAMINING_LOWDB_DATABASE")
+    username = os.getenv("DATAMINING_DB_USERNAME")
+    password = os.getenv("DATAMINING_DB_PASSWORD")
+    return server, port, database, username, password

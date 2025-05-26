@@ -1,11 +1,18 @@
 import streamlit as st
 import logging
 import traceback
+import os
+from datetime import datetime
+
 
 def setup_logger():
     """로그를 설정하는 함수"""
     logger = logging.getLogger(__name__)
-    handler = logging.FileHandler("app_errors2.log")
+    log_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'logger')
+    os.makedirs(log_dir, exist_ok = True)
+    today_str = datetime.now().strftime("%Y-%m%d")
+    log_filename = os.path.join(log_dir, f'{today_str}_apperror.log')
+    handler = logging.FileHandler(log_filename)
     handler.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
     logger.addHandler(handler)
     logger.setLevel(logging.ERROR)
@@ -18,7 +25,7 @@ def global_exception_handler(e):
     error_msg = ("오류 메시지", "".join(traceback.format_exception(type(e), e, e.__traceback__)))
     logger.error(f"Unhandled exception occurred: {error_msg}")
     st.session_state['error']=True
-    st.rerun()
+    st.stop()
     
 def error_page():
     st.error("예상치 못한 오류가 발생했습니다. 관리자에게 문의하세요.")

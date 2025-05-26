@@ -11,10 +11,12 @@ from components.ro1.macro.comp_ro1_dashboard import (
     dashboard_same_time_diff_action,
     dashboard_cos_sim,
     dashboard_self_sim,
+    dashboard_graph_visualization,
 )
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from utils.exception_handler import global_exception_handler
+
 
 def ro1_macro_dashbaord(
     dashboard_options: list = [
@@ -25,6 +27,7 @@ def ro1_macro_dashbaord(
         "2. 멀티 클라이언트-(다른행위)",
         "3. 코사인 유사도",
         "4. 자기 유사도",
+        "5. 유사도 시각화",
     ]
 ):
     try:
@@ -51,8 +54,8 @@ def ro1_macro_dashbaord(
                     </p>
                     """,
                     unsafe_allow_html=True,
-                    )
-            if st.sidebar.button("로그 아웃", type='primary', use_container_width=True):
+                )
+            if st.sidebar.button("로그 아웃", type="primary", use_container_width=True):
                 st.sidebar.markdown(
                     """
                     <p style="text-align: center; color: black; font-weight: bold;">
@@ -60,8 +63,8 @@ def ro1_macro_dashbaord(
                     </p>
                     """,
                     unsafe_allow_html=True,
-                    )
-                st.session_state['authenticated'] = False
+                )
+                st.session_state["authenticated"] = False
                 time.sleep(3)
                 st.rerun()
             # 선택된 세부 페이지에 따라 해당 페이지 로드
@@ -79,6 +82,7 @@ def ro1_macro_dashbaord(
             dashboard_cos_sim()  # 코사인 유사도 대시보드 함수
         elif selected_dashboard == "4. 자기 유사도":
             dashboard_self_sim()  # 자기 유사도 대시보드 함수
+        elif selected_dashboard == "5. 유사도 시각화":
+            dashboard_graph_visualization()  # 유사도 시각화 대시보드 함수
     except Exception as e:
         global_exception_handler(e)
-

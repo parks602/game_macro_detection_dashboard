@@ -13,12 +13,22 @@ sys.excepthook = global_exception_handler
 
 if "error" not in st.session_state:
     st.session_state["error"] = False
+if "download_raw_data" not in st.session_state:
+    st.session_state["download_raw_data"] = None
+if "download_raw_data_list" not in st.session_state:
+    st.session_state["download_raw_data_list"] = None
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
+if "download" not in st.session_state:
+    st.session_state["download"] = False
+if "download_data" not in st.session_state:
+    st.session_state["download_data"] = False
 if "change_step" not in st.session_state:
     st.session_state["change_step"] = None
 if "reset_step" not in st.session_state:
     st.session_state["reset_step"] = None
+if "user_name" not in st.session_state:
+    st.session_state["user_name"] = None
 if "reset_username" not in st.session_state:
     st.session_state["reset_username"] = None
 if "role" not in st.session_state:
@@ -34,12 +44,22 @@ if "macro_date" not in st.session_state:
 if "user_aid" not in st.session_state:
     st.session_state["user_aid"] = None
 if "selected_tab" not in st.session_state:
-    st.session_state["selected_tab"] = '로그인'
+    st.session_state["selected_tab"] = "로그인"
+if "selected_ip" not in st.session_state:
+    st.session_state["selected_ip"] = None
+if "selected_start_date" not in st.session_state:
+    st.session_state["selected_start_date"] = None
+if "selected_end_date" not in st.session_state:
+    st.session_state["selected_end_date"] = None
+    
+if "graph_generating" not in st.session_state:
+    st.session_state["graph_generating"] = {'second':False, 'minute':False, 'seconds':False}
 
+    
 if st.session_state["error"]:
     error_page()
 
-if st.session_state["authenticated"]==False:
+if st.session_state["authenticated"] == False:
     login()
 
 elif st.session_state["authenticated"]:
@@ -60,4 +80,3 @@ elif st.session_state["authenticated"]:
         login()
     elif st.session_state["page"] in ["관리자 페이지"]:
         admin()
-

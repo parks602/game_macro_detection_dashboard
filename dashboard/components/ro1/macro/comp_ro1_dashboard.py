@@ -1,6 +1,6 @@
 import streamlit as st
 
-from ...comp_common import date_selector
+from ...comp_common import date_selector, ip_selector, start_date_selector,   end_date_selector
 
 from .comp_ro1_dashboard_cs import (
     cs_display_metrics,
@@ -142,6 +142,7 @@ from .comp_ro1_dashboard_stsa import (
     stsa_show_dataframes,
 )
 
+
 def dashboard_same_time_same_action():
     st.title("멀티 클라이언트 동시 같은 행동")
     date_selector()
@@ -198,6 +199,7 @@ def dashboard_same_time_diff_action():
 
     top_users = select_top_user(df)
     stda_show_graph_top_users(stda_top20_user_graph(top_users))
+
 
 from .comp_ro1_dashboard_cosine_sim import (
     cosine_show_top_sentence,
@@ -260,3 +262,140 @@ def dashboard_self_sim():
     )
     self_show_graph(df, outliers)
     self_show_bottom(filtered_outliers, Q1, Q3, IQR, num_outliers_wide)
+
+
+from .comp_ro1_dashboard_graph_image import (
+    show_plot_activity_by_minute,
+    show_plot_activity_by_second,
+    show_plot_activity_by_seconds,
+)
+from funcitons.ro1.macro.graph_maker import (
+    activity_graph_maker,
+    get_image_data,
+    background_generate,
+    image_path_return,
+    activity_graph_maker2,
+    get_date_range,
+    get_csv_download,
+    save_download_log
+)
+
+import threading
+import os, traceback
+
+def dashboard_graph_visualization():
+    st.title("행동 유사성 기반 시각화")
+    mindate, maxdate = get_date_range()
+    st.info(f"입력 가능 일자: {mindate} ~ {maxdate}, 최대 60일")
+    st.info("예시) '시작: 2025-05-01', '종료: 2025-05-03 입력시 2025-05-01 00:00:00 ~ 2025-05-02 23:59:59까지 검색합니다.")
+    start_date_selector()
+    end_date_selector()
+    ip_selector()
+    
+    date_str = str(st.session_state["selected_start_date"])
+    end_date_str = str(st.session_state["selected_end_date"])
+    selected_ip = str(st.session_state["selected_ip"])
+
+    if not date_str or not end_date_str or not selected_ip:
+        st.warning("날짜와 IP를 선택하세요.")
+        return
+    if st.session_state["selected_start_date"] is not None and st.session_state["selected_end_date"] is not None and st.session_state["selected_ip"] is not None:
+        if st.session_state["selected_start_date"] >= st.session_state["selected_end_date"]:
+            st.warning("검색 종료 일자가 시작 일자와 같거나 작습니다.")
+        else:
+            st.success(f"선택된 날짜: {date_str} - {end_date_str}, 선택된 IP: {selected_ip}")
+    
+
+        second_image_path, seconds_image_path, minute_image_path = image_path_return(
+            date_str, end_date_str, selected_ip
+        )
+
+        co1, col2 = st.columns(2)
+        with co1:
+            show_second = st.checkbox("1초 단위 유저 활동 그래프 보기")
+            show_seconds = st.checkbox("10초 단위 유저 활동 그래프 보기")
+            show_minute = st.checkbox("1분 단위 유저 활동 그래프 보기")
+        with col2:
+            reason = st.text_input("다운로드 사유", "매크로 유저 제재 및 근거 확보")
+            if st.button("다운로드 데이터 생성 요청",use_container_width=True):
+                st.session_state["download_data"] = True
+                
+            if st.session_state["selected_start_date"] is not None and st.session_state["selected_end_date"] is not None and st.session_state["download"] == False and st.session_state["selected_ip"] is not None and st.session_state["download_data"] == True:
+                with st.spinner("다운로드 데이터 생성 중"):
+                    st.session_state["download_raw_data"],  st.session_state["download_raw_data_list"] = get_csv_download(date_str, end_date_str, selected_ip)
+            if st.session_state["selected_start_date"] is not None and st.session_state["selected_end_date"] is not None and st.session_state["download_data"] == True and st.session_state["selected_ip"] is not None:
+                st.session_state["download"] = True
+                try:
+                    st.download_button("데이터 Excel 다운로드",
+                                        st.session_state["download_raw_data"],
+                                        file_name = f'{date_str}_{end_date_str}_{selected_ip}.csv',
+                                        mime="text/csv",
+                                        disabled=not (reason, date_str, end_date_str, selected_ip),
+                                        use_container_width=True,)
+                except Exception as e:
+                    st.error(traceback.print_exc())
+                    st.error("검색 시작 일자, 검색 종료 일자, IP, 다운로드 사유 중 입력되지 않은 값이 있습니다.")
+                    st.session_state["download_data"] = False
+                    st.session_state["download"] = False
+
+            if st.session_state["download"] == True and st.session_state["download_data"] == True:
+                save_download_log(st.session_state["download_raw_data_list"], reason)
+                st.success("CSV 파일 다운로드 완료")
+            
+        # 초 단위 그래프 요청
+        if show_second:
+            if os.path.exists(second_image_path):
+                show_plot_activity_by_second(second_image_path)
+            elif not st.session_state.graph_generating["second"]:
+                with st.spinner("1초 단위 그래프 생성 중..."):
+                    df = get_image_data(date_str, end_date_str, selected_ip)
+                    st.info("(1/3)데이터 조회 완료")
+                    if df is not None:
+                        activity_graph_maker2(df, second_image_path, date_str, end_date_str, 1)
+                        st.info("(3/3)그래프 생성 완료")
+                    else:
+                        st.error("입력하신 정보로 조회된 데이터가 없습니다.")
+                show_plot_activity_by_second(second_image_path)
+            else:
+                st.info("1초 단위 그래프 생성 중입니다...")
+
+        st.write("---")
+
+        # 10초 단위 그래프 요청
+        if show_seconds:
+            if os.path.exists(seconds_image_path):
+                show_plot_activity_by_seconds(seconds_image_path)
+            elif not st.session_state.graph_generating["seconds"]:
+                with st.spinner("10초 단위 그래프 생성 중..."):
+                    df = get_image_data(date_str, end_date_str, selected_ip)
+                    st.info("(1/3)데이터 조회 완료")
+                    if df is not None:
+                        activity_graph_maker2(df, seconds_image_path, date_str, end_date_str, 10)
+                        st.info("(3/3)그래프 생성 완료")
+                    else:
+                        st.error("입력하신 정보로 조회된 데이터가 없습니다.")
+                show_plot_activity_by_second(seconds_image_path)
+            else:
+                st.info("10초 단위 그래프 생성 중입니다...")
+
+        st.write("---")
+        # 분 단위 그래프 요청
+        if show_minute:
+            if os.path.exists(minute_image_path):
+                show_plot_activity_by_minute(minute_image_path)
+            elif not st.session_state.graph_generating["minute"]:
+                with st.spinner("1분 단위 그래프 생성 중..."):
+                    df = get_image_data(date_str, end_date_str, selected_ip)
+                    st.info("(1/3)데이터 조회 완료")
+                    if df is not None:
+                        activity_graph_maker2(df, minute_image_path, date_str, end_date_str, 60)
+                        st.info("(3/3)그래프 생성 완료")
+                    else:
+                        st.error("입력하신 정보로 조회된 데이터가 없습니다.")
+                show_plot_activity_by_minute(minute_image_path)
+            else:
+                st.info("1분 단위 그래프 생성 중입니다...")
+
+        st.write("---")
+
+        st.subheader("(초단위)위 그래프에 중복 줍기가 발생한 경우 다른 색깔 표기")

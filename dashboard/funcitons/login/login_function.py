@@ -5,7 +5,8 @@ import socket
 import sys
 import platform
 from funcitons.db_connector import setup_activity
-
+from streamlit.runtime.scriptrunner import get_script_run_ctx
+from streamlit import runtime
 
 def validate_password(password: str) -> str:
     # 최소 8자리
@@ -36,8 +37,7 @@ def check_input(username, password):
 
 def check_login_attempt(username, client):
     now = datetime.now()
-    query = f"""
-    SELECT blocked_time FROM users WHERE username = '{username}'
+    query = f"""SELECT blocked_time FROM users WHERE username = '{username}'
     """
     result = client.get_one_fetch(query)
     if result is None or result[0] is None:
@@ -102,16 +102,10 @@ def log_login_attempt(username, status, client):
     로그인 시도 후, 성공 여부를 기록합니다.
     """
     ip, agent = get_sys_info()
-    query = """
-            INSERT INTO login_logs (username, login_time, status, ip_address, user_agent)
-            VALUES (?, GETDATE(), ?, ?, ?)
-            """, (
-        username,
-        status,
-        ip,
-        agent,
-    )
-    client.insert_with_execute(query)
+    query = """INSERT INTO login_logs (username, login_time, status, ip_address, user_agent)
+            VALUES (?, GETDATE(), ?, ?, ?)"""
+    values = [username, status, ip, agent]
+    client.insert_login_with_execute(query, values)
 
 
 def get_sys_info():
@@ -128,8 +122,16 @@ def get_client_ip():
     Returns:
         str: 클라이언트 IP 주소
     """
-    hostname = socket.gethostname()
-    return socket.gethostbyname(hostname)
+    try:
+        ctx = get_script_run_ctx()
+        if ctx is None:
+            return None
+        session_info = runtime.get_instance().get_client(ctx.session_id)
+        if session_info is None:
+            return None
+    except Exception as e:
+        return None
+    return session_info.request.remote_ip
 
 
 def get_user_agent():

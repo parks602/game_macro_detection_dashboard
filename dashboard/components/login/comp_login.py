@@ -9,6 +9,7 @@ from funcitons.login.login_function import (
 
 
 def login_form(
+    cookie_manager,
     login_username_label: str = "ID를 입력하세요",
     login_username_placeholder: str = None,
     login_username_help: str = None,
@@ -40,11 +41,14 @@ def login_form(
             success, role = authenticate_system(username, password, client)
             if success == True:
                 client.disconnect_from_db()
-                st.session_state.update({"authenticated": True, "role": role, "user_name":username})
-                st.success(f"{username}님, 로그인 성공!")
-                time.sleep(2)
+                st.session_state.update(
+                    {"authenticated": True, "role": role, "user_name": username}
+                )
+                cookie_manager.save_login_to_cookie(username, role)
+                st.success(f"🎉 {username}님, 로그인 성공!")
+                time.sleep(1)
                 st.rerun()
             else:
-                st.error(role)
+                st.error("로그인 정보가 올바르지 않습니다.")
                 if not check_fail_login(username, client):
                     st.error("로그인 실패 횟수 초과로 로그인이 30분간 차단됩니다.")

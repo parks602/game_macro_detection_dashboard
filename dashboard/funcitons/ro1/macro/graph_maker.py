@@ -64,7 +64,7 @@ def activity_graph_maker2(df, image_path, start_date_str, end_date_str, threshol
         .reset_index()
     )
     segments['End_Time'] = segments['End_Time'] + pd.Timedelta(seconds=1)
-    sorted_ids = segments["srcAccountID"].value_counts().index.tolist()
+    sorted_ids = segments["srcAccountID"].sort_values().to_list()
     st.info("(2/3)데이터 정제 완료")
     fig = px.timeline(
         segments,

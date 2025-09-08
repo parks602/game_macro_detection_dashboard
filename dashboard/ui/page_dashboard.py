@@ -44,29 +44,7 @@ def ro1_macro_dashbaord(
                 "대시보드 세부 페이지 선택", dashboard_options
             )
 
-        with st.sidebar.container():
-            st.sidebar.markdown("---")
-            if st.sidebar.button("세션 연장", use_container_width=True):
-                st.sidebar.markdown(
-                    """
-                    <p style="text-align: center; color: black; font-weight: bold;">
-                    세션이 연장되었습니다.
-                    </p>
-                    """,
-                    unsafe_allow_html=True,
-                )
-            if st.sidebar.button("로그 아웃", type="primary", use_container_width=True):
-                st.sidebar.markdown(
-                    """
-                    <p style="text-align: center; color: black; font-weight: bold;">
-                    로그아웃 완료!
-                    </p>
-                    """,
-                    unsafe_allow_html=True,
-                )
-                st.session_state["authenticated"] = False
-                time.sleep(3)
-                st.rerun()
+
             # 선택된 세부 페이지에 따라 해당 페이지 로드
         if selected_dashboard == "RO1 매크로 현황":
             dashboard_CS()

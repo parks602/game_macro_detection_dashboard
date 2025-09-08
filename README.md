@@ -450,3 +450,15 @@ def validate_password(password: str) -> str:
 ## 7. 에러 처리
 
 ## 8. 유지 보수
+
+
+### 2025.09.08 업데이트 사항
+
+1. **cookie 적용으로 인한 세션 한계 극복**
+    * utils/browseer_handler 생성
+    * streamlit_cookies_manager 라이브러리 사용
+    * 새로고침시 모든 페이지 렌더링되는 streamlit 한계 극복
+        * 로그인 정보 유지
+2. **LocalStorage 적용**
+    * streamlit_local_storage 라이브러리 사용
+    * 언어 설정 개발을 위한 기초 정보 저장

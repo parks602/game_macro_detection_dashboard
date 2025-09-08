@@ -17,10 +17,10 @@ def user_load_data(date_str):
     INNER JOIN(
         SELECT AID, Date
         FROM [dbo].[macro_user_summary]
-        WHERE distinction = 'detection' and Date <= '{date}' and Date > DATEADD(DAY, -10, '{date}')
+        WHERE distinction = 'suspicion' and Date <= '{date}' and Date > DATEADD(DAY, -10, '{date}')
         ) m2
     ON m1.AID = m2.AID AND m1.Date = m2.Date
-    WHERE m1.Date <= '{date}' and m1.Date > DATEADD(DAY, -10, '{date}')
+    WHERE m1.Date <= '{date}' and m1.Date > DATEADD(DAY, -10, '{date}') and m1.distinction = 'suspicion'
     """
 
     df = activity.get_df(query.format(date=date_str))

@@ -119,7 +119,6 @@ from funcitons.ro1.macro.user_search import user_load_data, user_make_pivot
 def dashboard_user_detail():
     st.title("유저별 매크로 탐지 근거")
     date_selector()
-
     date_str = user_show_top_sentence()
     df = user_load_data(date_str)
     pivot_df, detected_id = user_make_pivot(df)
@@ -324,8 +323,8 @@ def dashboard_graph_visualization():
                 with st.spinner("다운로드 데이터 생성 중"):
                     st.session_state["download_raw_data"],  st.session_state["download_raw_data_list"] = get_csv_download(date_str, end_date_str, selected_ip)
             if st.session_state["selected_start_date"] is not None and st.session_state["selected_end_date"] is not None and st.session_state["download_data"] == True and st.session_state["selected_ip"] is not None:
-                st.session_state["download"] = True
                 try:
+                    st.session_state["download"] = True
                     st.download_button("데이터 Excel 다운로드",
                                         st.session_state["download_raw_data"],
                                         file_name = f'{date_str}_{end_date_str}_{selected_ip}.csv',

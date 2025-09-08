@@ -23,6 +23,7 @@ def user_show_top_sentence():
 
 def user_show_pviot_df(pivot_df):
     st.write("##### 매크로 탐지 유저의 근거 표, 1:탐지, 0:미탐지")
+    pivot_df['검출 수'] = pivot_df.drop("AID", axis=1).sum(axis=1)
     st.dataframe(pivot_df, use_container_width=True)
 
 
@@ -33,10 +34,10 @@ def user_selector(detected_id):
 
 def user_show_middle(df, selected_aid):
     all_macro_detected_date = df[
-        (df["AID"] == selected_aid) & (df["distinction"] == "detection")
-    ]["Date"].sort_values()
+        (df["AID"] == selected_aid) & (df["distinction"] == "suspicion")
+    ]["Date"].unique()
     st.session_state["macro_date"] = (
-        df[(df["AID"] == selected_aid) & (df["distinction"] == "detection")]["Date"]
+        df[(df["AID"] == selected_aid) & (df["distinction"] == "suspicion")]["Date"]
         .max()
         .strftime("%Y-%m-%d")
     )
@@ -44,7 +45,7 @@ def user_show_middle(df, selected_aid):
     date_list = all_macro_detected_date.astype(str).tolist()
     formateed_text = ", ".join(date_list)
     st.markdown(
-        f"##### {selected_aid} 는 10일간 총 {len(all_macro_detected_date)}회, {formateed_text} 에 매크로로 검출 되었습니다."
+        f"##### {selected_aid} 는 10일간 총 {len(all_macro_detected_date)}회, {formateed_text} 에 매크로로 의심 되었습니다."
     )
     col1, col2 = st.columns([7, 3])
     with col1:
@@ -55,7 +56,7 @@ def user_show_middle(df, selected_aid):
             st.session_state["macro_date"] = str(user_date_selected)
 
     st.write(
-        f"##### {selected_aid} 는 {st.session_state['macro_date']} 검출 증거 입니다."
+        f"##### 일자 : {st.session_state['macro_date']} 의심 증거 입니다."
     )
     # 선택한 AID가 바뀌면 세션 업데이트 후 재실행
     if selected_aid != st.session_state["user_aid"]:

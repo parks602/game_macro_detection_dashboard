@@ -18,7 +18,7 @@ def cs_show_top_sentence():
 def cs_show_block_warning(block_ratio, block_percentage):
     if block_ratio < 0.5:
         st.error(
-            f"매크로 제재 비율 : {block_percentage}%, 당장 매크로 유저 제재가 필요합니다. 신속한 매크로 유저 제재가 필요합니다."
+            f"매크로 제재 비율 : {block_percentage}%, 신속한 매크로 유저 제재가 필요합니다."
         )
     elif block_ratio < 0.7:
         st.error(

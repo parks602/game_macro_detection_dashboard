@@ -34,11 +34,9 @@ def cs_calculate_user_counts(df, date_str):
     all_user_count = df["AID"].nunique()
     macro_user = df[df["distinction"] == "detection"]["AID"].nunique()
     suspic_user = df[df["distinction"] == "suspicion"]["AID"].nunique()
-    block_aids = df[(df["Date"] == date_str) & (df["distinction"] == "block")][
-        "AID"
-    ].unique()
+    block_aids = df[df["distinction"] == "block"]["AID"].unique()
     block_user = df[
-        (df["distinction"] == "detection") & (df["AID"].isin(block_aids))
+        (df["distinction"].isin(["detection", "suspicion"])) & (df["AID"].isin(block_aids))
     ].shape[0]
     clean_user = all_user_count - macro_user - suspic_user - block_user
     return (

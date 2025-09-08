@@ -1,4 +1,6 @@
 /Save_files
+/logger
+/graphs
 .env
 *.pyc
-*.txt
+__pycache__/
